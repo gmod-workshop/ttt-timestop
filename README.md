@@ -21,6 +21,7 @@ Includes an individual .vmt and .vtf shop icon.
 - ttt_timestop_random_chance (def: 0.5) - Chance time stops for each player (if enabled) (0.0 - 1.0)
 - ttt_timestop_tyrone (def: 0) - Should the alternate Big Man Tyrone sound be used?
 - ttt_timestop_cooldown (def: 10) - How long should the cooldown be (in seconds)?
+- ttt_timestop_visuals (def: 1) - Should the Time Stop visuals be shown?
 
 ## Server Info
 

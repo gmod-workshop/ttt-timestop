@@ -24,6 +24,9 @@ CreateConVar('ttt_timestop_random', 0, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_ARCHIVE}
 CreateConVar('ttt_timestop_random_chance', 0.5, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_ARCHIVE}, 'Chance time stops for each player (if enabled) (0.0 - 1.0)')
 CreateConVar('ttt_timestop_tyrone', 0, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_ARCHIVE}, 'Should the alternate Big Man Tyrone sound be used?')
 CreateConVar('ttt_timestop_cooldown', 10, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_ARCHIVE}, 'How long should the cooldown be (in seconds)?')
+CreateConVar('ttt_timestop_visuals', 1, {FCVAR_SERVER_CAN_EXECUTE, FCVAR_ARCHIVE}, 'Should the Time Stop visuals be shown?')
+
+CreateClientConVar('ttt_timestop_offset', '0,0,0', true, false, 'The offset of the Time Stop effect (X,Y,Z)')
 
 -- Sandbox Compatibility
 
@@ -40,7 +43,8 @@ local TIMESTOP_DEFAULTS = {
 	['ttt_timestop_random'] = 0,
 	['ttt_timestop_random_chance'] = 0.5,
 	['ttt_timestop_tyrone'] = 0,
-	['ttt_timestop_cooldown'] = 10
+	['ttt_timestop_cooldown'] = 10,
+	['ttt_timestop_visuals'] = 1
 }
 
 hook.Add('PopulateToolMenu', 'TimeStopPopulateToolMenu', function()
@@ -81,17 +85,22 @@ hook.Add('PopulateToolMenu', 'TimeStopPopulateToolMenu', function()
 
 		panel:Help('Effect Settings')
 
+		panel:CheckBox('Time Stop Visuals', 'ttt_timestop_visuals')
+		panel:ControlHelp('Should the Time Stop visuals be shown?')
+
 		panel:CheckBox('Time Stop Tyrone', 'ttt_timestop_tyrone')
 		panel:ControlHelp('Should the alternate Big Man Tyrone sound be used?')
 	end)
 end)
 
--- TTT/2 Compatibility
+-- TTT Compatibility
 
-if CLIENT and LANG ~= nil then
-	LANG.AddToLanguage('english', 'timestop_weapon_name', 'Time Stop')
-	LANG.AddToLanguage('english', 'timestop_weapon_desc', 'One second... Two seconds...\n')
-end
+hook.Add('InitPostEntity', 'TimeStopInitPostEntity', function()
+	if TTT2 ~= nil or LANG == nil then return end
+
+	LANG.AddToLanguage('English', 'timestop_name', 'Time Stop')
+	LANG.AddToLanguage('English', 'timestop_desc', 'One second... Two seconds...\n')
+end)
 
 -- TTT ULX Compatibility
 
@@ -105,6 +114,7 @@ hook.Add('TTTUlxInitCustomCVar', 'TimeStopTTTUlxInitCustomCVar', function(name)
 	ULib.replicatedWritableCvar('ttt_timestop_random_chance', 'rep_ttt_timestop_random_chance', GetConVar('ttt_timestop_random_chance'):GetFloat(), true, false, name)
 	ULib.replicatedWritableCvar('ttt_timestop_tyrone', 'rep_ttt_timestop_tyrone', GetConVar('ttt_timestop_tyrone'):GetBool(), true, false, name)
 	ULib.replicatedWritableCvar('ttt_timestop_cooldown', 'rep_ttt_timestop_cooldown', GetConVar('ttt_timestop_cooldown'):GetFloat(), true, false, name)
+	ULib.replicatedWritableCvar('ttt_timestop_visuals', 'rep_ttt_timestop_visuals', GetConVar('ttt_timestop_visuals'):GetBool(), true, false, name)
 end)
 
 if CLIENT then
@@ -179,8 +189,11 @@ if CLIENT then
 		tttrslst4:SetSize(390, 50)
 		tttrslst4:SetSpacing(5)
 
-		local tttrsdh41 = xlib.makecheckbox{label = 'ttt_timestop_tyrone (Def. 0)', repconvar = 'rep_ttt_timestop_tyrone', parent = tttrslst4}
+		local tttrsdh41 = xlib.makecheckbox{label = 'ttt_timestop_visuals (Def. 1)', repconvar = 'rep_ttt_timestop_visuals', parent = tttrslst4}
 		tttrslst4:AddItem(tttrsdh41)
+
+		local tttrsdh42 = xlib.makecheckbox{label = 'ttt_timestop_tyrone (Def. 0)', repconvar = 'rep_ttt_timestop_tyrone', parent = tttrslst4}
+		tttrslst4:AddItem(tttrsdh42)
 
 		xgui.hookEvent('onProcessModules', nil, tttrspnl.processModules)
 		xgui.addSubModule('Time Stop', tttrspnl, nil, name)
